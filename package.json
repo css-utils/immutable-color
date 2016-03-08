@@ -1,0 +1,18 @@
+{
+  "name": "immutable-color",
+  "version": "0.1.0",
+  "description": "Immutable color manipulator",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha -r should -R spec -w"
+  },
+  "author": "Michael Andrew Vanasse <mail@mndvns.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "should": "^8.2.1"
+  },
+  "dependencies": {
+    "color-to-hsla": "^0.1.0"
+  }
+}
