@@ -13,16 +13,9 @@ var NPOW = 1 / POW;
 
 function ImmutableColor(val) {
   if (!(this instanceof ImmutableColor)) return new ImmutableColor(val);
-  this.values = parse(val);
-  this.h = set.bind(this, 'h');
-  this.s = set.bind(this, 's');
-  this.l = set.bind(this, 'l');
-  this.a = set.bind(this, 'a');
-  this.darken = pow.call(this, 1, 'l');
-  this.lighten = pow.call(this, 0, 'l');
-  this.soften = pow.call(this, 1, 'a', 100);
-  this.harden = pow.call(this, 0, 'a', 100);
-  return this;
+  return Object.defineProperty(this, 'values', {
+    value: Object.freeze(parse(val))
+  });
 };
 
 ImmutableColor.prototype.toString = function(notation) {
@@ -35,19 +28,31 @@ ImmutableColor.prototype.toString = function(notation) {
   ].join(', ') + ')';
 };
 
-ImmutableColor.prototype.clone = function() {
-  return new ImmutableColor(JSON.parse(JSON.stringify(this.values)));
-};
+set('h');
+set('s');
+set('l');
+set('a');
+pow('darken', 1, 'l');
+pow('lighten', 0, 'l');
+pow('soften', 1, 'a', 100);
+pow('harden', 0, 'a', 100);
+pow('brighten', 1, 's');
+pow('dampen', 0, 's');
 
-function set(prop, num) {
-  var cloned = this.clone();
-  cloned.values[prop] = num;
-  return cloned;
+function set(prop) {
+  ImmutableColor.prototype[prop] = function(num) {
+    if (!arguments.length) return this.values[prop];
+    return clone(this.values, {[prop]: num});
+  };
 }
 
-function pow(isPositive, prop, by) {
+function clone(values, newValues) {
+  return new ImmutableColor(merge(values, newValues));
+}
+
+function pow(name, isPositive, prop, by) {
   var pow = isPositive ? POW : NPOW;
-  return function(k) {
+  ImmutableColor.prototype[name] = function(k) {
     k = k == null ? pow : Math.pow(pow, k);
     return this[prop](round(this.values[prop] * k, by));
   };
@@ -56,6 +61,15 @@ function pow(isPositive, prop, by) {
 function round(num, by) {
   by = by || 10000;
   return Math.round(num * by) / by;
+}
+
+function merge(a, b) {
+  a = a || {};
+  b = b || {};
+  var z = {};
+  for (var ak in a) z[ak] = a[ak] || 0;
+  for (var bk in b) z[bk] = b[bk] || 0;
+  return z;
 }
 
 exports['default'] = module.exports = ImmutableColor;

@@ -40,9 +40,20 @@ describe('immutable-color', function() {
       'hsla(0, 50%, 50%, 0.36)'.should.equal(c.harden(1).toString());
       'hsla(0, 50%, 50%, 0.51)'.should.equal(c.harden(2).toString());
     });
+    it('#brighten', function() {
+      var c = lib('hsla(0, 100%, 50%, 1)');
+      'hsla(0, 70%, 50%, 1)'.should.equal(c.dampen(-1).toString());
+      'hsla(0, 70%, 50%, 1)'.should.equal(c.brighten(1).toString());
+      'hsla(0, 49%, 50%, 1)'.should.equal(c.brighten(2).toString());
+      'hsla(0, 34.3%, 50%, 1)'.should.equal(c.brighten(3).toString());
+    });
+    it('#dampen', function() {
+      var c = lib('hsla(0, 25%, 50%, 1)');
+      'hsla(0, 35.71%, 50%, 1)'.should.equal(c.dampen(1).toString());
+      'hsla(0, 51.02%, 50%, 1)'.should.equal(c.dampen(2).toString());
+      'hsla(0, 72.89%, 50%, 1)'.should.equal(c.dampen(3).toString());
+    });
     // TODO
-    // #saturate
-    // #desaturate
     // #rotate
   });
 });
