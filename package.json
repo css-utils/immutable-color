@@ -1,6 +1,6 @@
 {
   "name": "immutable-color",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Immutable color manipulator",
   "main": "index.js",
   "scripts": {
