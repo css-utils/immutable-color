@@ -1,4 +1,5 @@
 var lib = require('..');
+var should = require('should');
 
 describe('immutable-color', function() {
   describe('set methods', function() {
@@ -18,42 +19,63 @@ describe('immutable-color', function() {
   });
 
   describe('adjust methods', function() {
-    it('#darken', function() {
-      var c = lib('hsla(0, 100%, 50%, 1)');
-      'hsla(0, 100%, 35%, 1)'.should.equal(c.darken(1).toString());
-      'hsla(0, 100%, 35%, 1)'.should.equal(c.lighten(-1).toString());
+    runPow('darken', 'lighten', {
+      '3': 'hsla(0, 100%, 17.15%, 1)',
+      '2': 'hsla(0, 100%, 24.5%, 1)',
+      '1': 'hsla(0, 100%, 35%, 1)',
+      '0': 'hsla(0, 100%, 50%, 1)',
+      '-1': 'hsla(0, 100%, 71.43%, 1)',
+      '-2': 'hsla(0, 100%, 100%, 1)',
+      '-3': 'hsla(0, 100%, 100%, 1)'
     });
-    it('#lighten', function() {
-      var c = lib('hsla(0, 100%, 50%, 1)');
-      'hsla(0, 100%, 71.43%, 1)'.should.equal(c.lighten(1).toString());
-      'hsla(0, 100%, 71.43%, 1)'.should.equal(c.darken(-1).toString());
+
+    runPow('harden', 'soften', {
+      '3': 'hsla(0, 50%, 50%, 1)',
+      '2': 'hsla(0, 50%, 50%, 1)',
+      '1': 'hsla(0, 50%, 50%, 0.71)',
+      '0': 'hsla(0, 50%, 50%, .5)',
+      '-1': 'hsla(0, 50%, 50%, 0.35)',
+      '-2': 'hsla(0, 50%, 50%, 0.24)',
+      '-3': 'hsla(0, 50%, 50%, 0.17)'
     });
-    it('#soften', function() {
-      var c = lib('hsla(0, 50%, 50%, 1)');
-      'hsla(0, 50%, 50%, 0.7)'.should.equal(c.harden(-1).toString());
-      'hsla(0, 50%, 50%, 0.7)'.should.equal(c.soften(1).toString());
-      'hsla(0, 50%, 50%, 0.49)'.should.equal(c.soften(2).toString());
-      'hsla(0, 50%, 50%, 0.34)'.should.equal(c.soften(3).toString());
+
+    runPow('brighten', 'dampen', {
+      '3': 'hsla(0, 100%, 50%, 1)',
+      '2': 'hsla(0, 100%, 50%, 1)',
+      '1': 'hsla(0, 71.43%, 50%, 1)',
+      '0': 'hsla(0, 50%, 50%, 1)',
+      '-1': 'hsla(0, 35%, 50%, 1)',
+      '-2': 'hsla(0, 24.5%, 50%, 1)',
+      '-3': 'hsla(0, 17.15%, 50%, 1)'
     });
-    it('#harden', function() {
-      var c = lib('hsla(0, 50%, 50%, .25)');
-      'hsla(0, 50%, 50%, 0.36)'.should.equal(c.harden(1).toString());
-      'hsla(0, 50%, 50%, 0.51)'.should.equal(c.harden(2).toString());
+
+    function runPow(pos, neg, values) {
+      var c = lib(values['0']);
+      for (var k in values) {
+        if (k === '0') continue;
+        var val = values[k];
+        var int = parseInt(k);
+        var getter = (int > 0 ? pos : neg).slice(0, -2) + (['', 'er', 'est'][Math.abs(int) - 1]);
+        describe('#' + pos + ' ' + k, ()=> {
+          it(pos + '(' + int + ')', () => c[pos](int).toString().should.equal(val));
+          it(neg + '(' + (-int) + ')', () => c[neg](-int).toString().should.equal(val));
+          it(getter, () => c[getter].toString().should.equal(val));
+        });
+      }
+    }
+  });
+
+  describe('#rotate', () => {
+    it('should rotate positively', () => {
+      var c = lib('hsla(0, 0%, 0%, 1)');
+      c.rotate(10).toString().should.equal('hsla(10, 0%, 0%, 1)');
+      c.rotate(370).toString().should.equal('hsla(10, 0%, 0%, 1)');
     });
-    it('#dampen', function() {
-      var c = lib('hsla(0, 100%, 50%, 1)');
-      'hsla(0, 70%, 50%, 1)'.should.equal(c.brighten(-1).toString());
-      'hsla(0, 70%, 50%, 1)'.should.equal(c.dampen(1).toString());
-      'hsla(0, 49%, 50%, 1)'.should.equal(c.dampen(2).toString());
-      'hsla(0, 34.3%, 50%, 1)'.should.equal(c.dampen(3).toString());
+
+    it('should rotate negatively', () => {
+      var c = lib('hsla(0, 0%, 0%, 1)');
+      c.rotate(-10).toString().should.equal('hsla(350, 0%, 0%, 1)');
+      c.rotate(-370).toString().should.equal('hsla(350, 0%, 0%, 1)');
     });
-    it('#brighten', function() {
-      var c = lib('hsla(0, 25%, 50%, 1)');
-      'hsla(0, 35.71%, 50%, 1)'.should.equal(c.brighten(1).toString());
-      'hsla(0, 51.02%, 50%, 1)'.should.equal(c.brighten(2).toString());
-      'hsla(0, 72.89%, 50%, 1)'.should.equal(c.brighten(3).toString());
-    });
-    // TODO
-    // #rotate
   });
 });

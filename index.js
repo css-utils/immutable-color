@@ -28,6 +28,18 @@ ImmutableColor.prototype.toString = function(notation) {
   ].join(', ') + ')';
 };
 
+ImmutableColor.prototype.clone = function() {
+  console.warn('Method \'clone\' will be deprecated in version 2.');
+  return clone(this.values);
+};
+
+ImmutableColor.prototype.rotate = function(num) {
+  var value = this.values.h + num;
+  if (value < 0) value = 360 + (value % 360);
+  else if (value > 360) value = value % 360;
+  return this.h(value);
+};
+
 set('h');
 set('s');
 set('l');
@@ -46,10 +58,6 @@ function set(prop) {
   };
 }
 
-function clone(values, newValues) {
-  return new ImmutableColor(merge(values, newValues));
-}
-
 function pow(name, isPositive, prop, by) {
   var pow = isPositive ? POW : NPOW;
   ImmutableColor.prototype[name] = function(k) {
@@ -57,6 +65,22 @@ function pow(name, isPositive, prop, by) {
     var value = taper(0, 1, this.values[prop] * k, by);
     return this[prop](value);
   };
+  generateGetters(name);
+}
+
+function generateGetters(name) {
+  var prefix = name.slice(0, -2);
+  ['', 'er', 'est'].map((ending, i) => {
+    Object.defineProperty(ImmutableColor.prototype, prefix + ending, {
+      get: function() {
+        return this[name](i + 1)
+      }
+    });
+  });
+}
+
+function clone(values, newValues) {
+  return new ImmutableColor(merge(values, newValues));
 }
 
 function taper(min, max, num, by) {
