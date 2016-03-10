@@ -22,8 +22,8 @@ ImmutableColor.prototype.toString = function(notation) {
   var vals = this.values;
   return 'hsla(' + [
     (vals.h || 0),
-    round(Math.max(0, Math.min(100, (vals.s || 0) * 100)), 100) + '%',
-    round(Math.max(0, Math.min(100, (vals.l || 0) * 100)), 100) + '%',
+    taper(0, 100, vals.s, 100) + '%',
+    taper(0, 100, vals.l, 100) + '%',
     Math.max(0, Math.min(1, vals.a || 1)),
   ].join(', ') + ')';
 };
@@ -36,8 +36,8 @@ pow('darken', 1, 'l');
 pow('lighten', 0, 'l');
 pow('soften', 1, 'a', 100);
 pow('harden', 0, 'a', 100);
-pow('brighten', 1, 's');
-pow('dampen', 0, 's');
+pow('dampen', 1, 's');
+pow('brighten', 0, 's');
 
 function set(prop) {
   ImmutableColor.prototype[prop] = function(num) {
@@ -54,13 +54,14 @@ function pow(name, isPositive, prop, by) {
   var pow = isPositive ? POW : NPOW;
   ImmutableColor.prototype[name] = function(k) {
     k = k == null ? pow : Math.pow(pow, k);
-    return this[prop](round(this.values[prop] * k, by));
+    var value = taper(0, 1, this.values[prop] * k, by);
+    return this[prop](value);
   };
 }
 
-function round(num, by) {
+function taper(min, max, num, by) {
   by = by || 10000;
-  return Math.round(num * by) / by;
+  return Math.round(Math.max(min, Math.min(max, (num || 0) * max)) * by) / by;
 }
 
 function merge(a, b) {
@@ -72,4 +73,4 @@ function merge(a, b) {
   return z;
 }
 
-exports['default'] = module.exports = ImmutableColor;
+module.exports = exports['default'] = ImmutableColor;
