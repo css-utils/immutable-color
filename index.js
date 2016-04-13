@@ -11,10 +11,19 @@ var parse = require('color-to-hsla');
 var POW = 0.7;
 var NPOW = 1 / POW;
 
-function ImmutableColor(val) {
-  if (!(this instanceof ImmutableColor)) return new ImmutableColor(val);
-  return Object.defineProperty(this, 'values', {
-    value: Object.freeze(parse(val))
+function ImmutableColor(val, opts) {
+  if (!(this instanceof ImmutableColor)) return new ImmutableColor(val, opts);
+  Object.defineProperties(this, {
+    mutated: {
+      writable: true,
+      value: {}
+    },
+    options: {
+      value: Object.freeze(opts || {})
+    },
+    values: {
+      value: Object.freeze(parse(val))
+    }
   });
 };
 
@@ -71,9 +80,18 @@ function pow(name, isPositive, prop, by) {
 function generateGetters(name) {
   var prefix = name.slice(0, -2);
   ['', 'er', 'est'].map((ending, i) => {
-    Object.defineProperty(ImmutableColor.prototype, prefix + ending, {
+    var prop = prefix + ending;
+    Object.defineProperty(ImmutableColor.prototype, prop, {
       get: function() {
-        return this[name](i + 1)
+        if (!this.options.mutable || typeof this.mutated[prop] === 'undefined') {
+          return this[name](i + 1);
+        } else {
+          return this.mutated[prop].value;
+        }
+      },
+      set: function(newValue) {
+        if (!this.options.mutable) return this[name](i + 1);
+        return this.mutated[prop] = {value: newValue};
       }
     });
   });
