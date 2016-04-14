@@ -13,6 +13,8 @@ var NPOW = 1 / POW;
 
 function ImmutableColor(val, opts) {
   if (!(this instanceof ImmutableColor)) return new ImmutableColor(val, opts);
+  var value = Object.freeze(parse(val));
+  if (!value) throw new Error('Invalid color \'' + val + '\'');
   Object.defineProperties(this, {
     mutated: {
       writable: true,
