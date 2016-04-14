@@ -32,7 +32,7 @@ function ImmutableColor(val, opts) {
 ImmutableColor.prototype.toString = function(notation) {
   var vals = this.values;
   return 'hsla(' + [
-    (vals.h || 0),
+    Math.round(vals.h || 0),
     taper(0, 100, vals.s, 100) + '%',
     taper(0, 100, vals.l, 100) + '%',
     Math.max(0, Math.min(1, vals.a || 1)),
